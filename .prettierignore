@@ -1,0 +1,8 @@
+node_modules/
+.husky/
+.cache/
+public/
+.eslintrc.js
+.prettierrc.js
+remix.config.js
+remix.env.d.ts
