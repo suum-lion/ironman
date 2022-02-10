@@ -8,3 +8,4 @@ themes/
 .prettierrc.js
 remix.config.js
 remix.env.d.ts
+server/build/

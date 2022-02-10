@@ -1,37 +1,41 @@
-import compression from "compression";
-import { createRequestHandler } from "@remix-run/express";
-import express from "express";
-import morgan from "morgan";
-import path from "path";
+/* eslint-disable @typescript-eslint/no-misused-promises */
+import { createRequestHandler } from '@remix-run/express'
+import compression from 'compression'
+import express, { NextFunction, Request, Response } from 'express'
+import morgan from 'morgan'
+import path from 'path'
 
-const MODE = process.env.NODE_ENV;
-const BUILD_DIR = path.join(process.cwd(), "server/build");
+const MODE = process.env.NODE_ENV
+const BUILD_DIR = path.join(process.cwd(), 'server/build')
 
-const app = express();
-app.use(compression());
+const app = express()
+app.use(compression())
+app.use(express.json())
 
 // You may want to be more aggressive with this caching
-app.use(express.static("public", { maxAge: "1h" }));
+app.use(express.static('public', { maxAge: '1h' }))
 
 // Remix fingerprints its assets so we can cache forever
-app.use(express.static("public/build", { immutable: true, maxAge: "1y" }));
+app.use(express.static('public/build', { immutable: true, maxAge: '1y' }))
 
-app.use(morgan("tiny"));
+app.use(morgan('tiny'))
+
 app.all(
-  "*",
-  MODE === "production"
-    ? createRequestHandler({ build: require("./build") })
-    : (req, res, next) => {
-        purgeRequireCache();
-        const build = require("./build");
-        return createRequestHandler({ build, mode: MODE })(req, res, next);
-      }
-);
+  '*',
+  MODE === 'production'
+    ? createRequestHandler({ build: require('./build') })
+    : (req: Request, res: Response, next: NextFunction) => {
+        purgeRequireCache()
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const build = require('./build')
+        return createRequestHandler({ build, mode: MODE })(req, res, next)
+      },
+)
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3000
 app.listen(port, () => {
-  console.log(`Express server listening on port ${port}`);
-});
+  console.log(`Express server listening on port ${port}`)
+})
 
 ////////////////////////////////////////////////////////////////////////////////
 function purgeRequireCache() {
@@ -42,7 +46,7 @@ function purgeRequireCache() {
   // for you by default
   for (const key in require.cache) {
     if (key.startsWith(BUILD_DIR)) {
-      delete require.cache[key];
+      delete require.cache[key]
     }
   }
 }
